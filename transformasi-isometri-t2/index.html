@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformasi Isometri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&display=swap">
+<style>
+:root{--bg:#F8FCFF;--card:#FFFFFF;--panel:#E9F4FD;--line:#DCEBF8;--ink:#1F2533;--muted:#5B6475;--navy:#3B5B8F;--sky:#8CC3EA;--peach:#F5B877;--sage:#9AA683}
+@media (prefers-color-scheme:dark){:root{--bg:#121722;--card:#1A2130;--panel:#1E2A3D;--line:#2A3850;--ink:#E8EDF5;--muted:#A3AEC2;--navy:#9DBBEA}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 "Hanken Grotesk",-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 64px}
+.back{display:inline-block;font-size:15px;font-weight:600;color:var(--navy);text-decoration:none;margin-bottom:20px}
+.back:hover{text-decoration:underline}
+header{background:var(--panel);border-radius:20px;padding:28px 24px;margin-bottom:28px}
+header small{display:block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header h1{margin:6px 0 0;font-size:clamp(26px,5.5vw,38px);line-height:1.15;font-weight:800;color:var(--navy);letter-spacing:-.01em}
+h2{font-size:24px;line-height:1.25;color:var(--navy);margin:40px 0 12px}
+h3{font-size:19px;line-height:1.3;margin:28px 0 8px}
+h4{font-size:17px;margin:20px 0 6px}
+p,li{max-width:70ch}
+a{color:var(--navy)}
+img{display:block;max-width:100%;height:auto;margin:12px 0;border-radius:12px;border:1px solid var(--line);background:#fff}
+pre{white-space:pre-wrap;background:var(--panel);border-radius:12px;padding:12px 14px;font:15px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.5}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--navy);color:#fff;font-weight:700}
+@media (prefers-color-scheme:dark){th{color:#121722}}
+tr:last-child td{border-bottom:0}
+tr:nth-child(even) td{background:var(--panel)}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+@media print{.back{display:none}header{background:none;padding:0}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="../">← Kembali ke senarai bahan</a>
+<header><small>Panduan PdP · Tingkatan 2</small><h1>Transformasi Isometri</h1></header>
+<main>
+<p><strong>MATEMATIK TINGKATAN 2</strong></p>
+<p><strong>Tugasan Panduan PdP: Transformasi Isometri</strong></p>
+<div class="tw"><table><tr><th><strong>Perkara</strong></th><th><strong>Butiran</strong></th></tr><tr><td>Bidang Pembelajaran</td><td>Sukatan dan Geometri</td></tr><tr><td>Tajuk</td><td>7.0 Transformasi Isometri</td></tr><tr><td>Subtajuk</td><td>7.1 Transformasi</td></tr><tr><td>Standard Pembelajaran</td><td><strong>7.1.1</strong> Mengenal pasti kekongruenan dan keserupaan segi tiga dan sisi empat.<br><strong>7.1.2</strong> Mengenal pasti transformasi melalui perubahan bentuk, saiz, kedudukan dan orientasi suatu objek.</td></tr><tr><td>Cadangan masa</td><td>2 × 60 minit (Sesi 1: 7.1.1, Sesi 2: 7.1.2)</td></tr></table></div>
+<ul>
+<li><strong>Pembelajaran inkuiri penemuan:</strong> murid membanding pasangan bentuk menggunakan kertas surih, pembaris dan protraktor, kemudian merumus syarat kekongruenan dan keserupaan sendiri.</li>
+<li><strong>Pembelajaran berasaskan aktiviti (hands-on):</strong> potong, surih, gelongsor, terbalikkan dan putarkan bentuk kertas untuk melihat perubahan kedudukan dan orientasi.</li>
+<li><strong>Pembelajaran koperatif PAK-21:</strong> Think-Pair-Share, Gallery Walk dan Round Table.</li>
+<li><strong>Pembelajaran kontekstual:</strong> jubin lantai, logo, corak batik dan songket, imej telefon (zum dan putar).</li>
+<li><strong>Penggunaan teknologi (pilihan):</strong> GeoGebra atau aplikasi lukisan untuk mengubah saiz dan memutar bentuk.</li>
+</ul>
+<h1>2. Pengetahuan Sedia Ada</h1>
+<ul>
+<li>Sifat geometri segi tiga dan sisi empat (sisi, sudut, sisi selari) — Tingkatan 1.</li>
+<li>Mengukur panjang dengan pembaris dan sudut dengan protraktor.</li>
+<li>Nisbah dan perkadaran — Tingkatan 1 (asas kepada keserupaan).</li>
+<li>Satah Cartes dan koordinat titik.</li>
+<li>Simetri dan paksi simetri — sekolah rendah.</li>
+</ul>
+<h1>3. Cadangan Aktiviti PdP Berkaitan</h1>
+<h2>Sesi 1 — 7.1.1 Kekongruenan dan Keserupaan</h2>
+<div class="tw"><table><tr><td><strong>1. Induksi Set (10 minit): &quot;Kembar atau Sepupu?&quot;</strong><br>Guru menayangkan tiga pasangan gambar: (a) dua jubin lantai yang sama, (b) foto asal dan foto yang dibesarkan, (c) dua segi tiga yang berlainan bentuk.<br>Soalan cetusan: &quot;Pasangan mana yang <strong>sama sepenuhnya</strong>? Pasangan mana yang <strong>sama bentuk tetapi berlainan saiz</strong>? Bagaimana anda tahu?&quot;<br>Murid berbincang berpasangan (Think-Pair-Share). Guru tidak memberi istilah lagi.</td></tr></table></div>
+<div class="tw"><table><tr><td><strong>2. Aktiviti (40 minit)</strong><br><strong>Aktiviti A — Uji dengan kertas surih (15 minit).</strong> Setiap kumpulan menerima kad 8 bentuk (segi tiga dan sisi empat). Murid menyurih satu bentuk dan meletakkannya di atas bentuk lain. Jika bertindih tepat (mungkin selepas diputar atau diterbalikkan), catat sebagai &quot;sama tepat&quot;.<br><strong>Aktiviti B — Ukur dan bandingkan (15 minit).</strong> Untuk pasangan yang &quot;sama bentuk&quot;, murid mengukur semua sisi dan sudut, kemudian mengisi jadual:<br><strong>Aktiviti C — Rumus sendiri (10 minit).</strong> Kumpulan menulis dua ayat: &quot;Dua bentuk dikatakan ___ jika …&quot; Guru kemudian memperkenalkan istilah <strong>kongruen</strong> dan <strong>serupa</strong> berdasarkan ayat murid.</td></tr></table></div>
+<div class="tw"><table><tr><td><strong>3. Kesimpulan (10 minit)</strong><br><strong>Kongruen:</strong> bentuk dan saiz sama. Semua sisi sepadan sama panjang dan semua sudut sepadan sama besar.<br><strong>Serupa:</strong> bentuk sama, saiz mungkin berbeza. Semua sudut sepadan sama besar dan nisbah semua sisi sepadan adalah sama.<br>Semua bentuk yang kongruen adalah serupa, tetapi bentuk serupa tidak semestinya kongruen.<br>Semakan pantas: 3 soalan &quot;Kongruen / Serupa / Bukan kedua-duanya&quot;.</td></tr></table></div>
+<h2>Sesi 2 — 7.1.2 Mengenal Pasti Transformasi</h2>
+<div class="tw"><table><tr><td><strong>1. Induksi Set (10 minit): &quot;Apa yang berubah?&quot;</strong><br>Guru menunjukkan satu gambar anak panah di skrin, kemudian empat versi: digelongsor ke kanan, dicerminkan, diputar 90°, dan dibesarkan.<br>Soalan cetusan: &quot;Untuk setiap versi, apa yang berubah — <strong>bentuk, saiz, kedudukan</strong> atau <strong>orientasi</strong>? Apa yang kekal?&quot;</td></tr></table></div>
+<div class="tw"><table><tr><td><strong>2. Aktiviti (40 minit)</strong><br><strong>Aktiviti A — Gerakkan bentuk (15 minit).</strong> Murid meletakkan bentuk kertas berlabel huruf &quot;F&quot; pada kertas grid, lalu (i) menggelongsornya, (ii) menterbalikkannya pada satu garis, (iii) memutarnya pada satu titik. Selepas setiap gerakan, murid menyurih imej dan merekod perubahan dalam jadual.<br><em>*Kecuali objek terletak pada garis pantulan atau pusat putaran. Jadual di atas ialah </em><em><strong>kunci guru</strong></em><em>; murid menerima jadual kosong.</em><br><strong>Aktiviti B — Gallery Walk (15 minit).</strong> Lapan stesen gambar (logo, corak batik, jubin, wau, imej telefon). Kumpulan menamakan jenis gerakan dan menulis perubahan yang berlaku.<br><strong>Aktiviti C — Namakan (10 minit).</strong> Guru memperkenalkan istilah: <strong>objek, imej, transformasi, translasi, pantulan, putaran, pembesaran</strong>, dan <strong>isometri</strong> (transformasi yang mengekalkan bentuk dan saiz).</td></tr></table></div>
+<div class="tw"><table><tr><td><strong>3. Kesimpulan (10 minit)</strong><br><strong>Transformasi</strong> ialah pemetaan satu objek kepada imejnya.<br><strong>Translasi, pantulan dan putaran</strong> ialah <strong>transformasi isometri</strong>: bentuk dan saiz kekal, jadi imej <strong>kongruen</strong> dengan objek.<br><strong>Pembesaran</strong> mengubah saiz tetapi mengekalkan bentuk, jadi imej <strong>serupa</strong> dengan objek dan pembesaran <strong>bukan</strong> isometri.<br>Hubung kembali dengan 7.1.1: transformasi isometri menghasilkan bentuk kongruen.</td></tr></table></div>
+<h1>4. Kompetensi</h1>
+<div class="tw"><table><tr><th><strong>Kompetensi</strong></th><th><strong>Petunjuk dalam topik ini</strong></th></tr><tr><td>Pengetahuan</td><td>Menyatakan maksud kongruen, serupa, objek, imej dan transformasi.</td></tr><tr><td>Kefahaman</td><td>Menerangkan perbezaan kongruen dan serupa berdasarkan sisi dan sudut.</td></tr><tr><td>Aplikasi</td><td>Mengenal pasti pasangan bentuk kongruen/serupa dan jenis transformasi dalam situasi harian.</td></tr><tr><td>Penyelesaian masalah</td><td>Menentukan panjang sisi yang tidak diketahui bagi bentuk serupa.</td></tr><tr><td>Komunikasi</td><td>Menggunakan istilah yang tepat semasa membentang hasil kumpulan.</td></tr></table></div>
+<h1>5. Kemahiran Matematik</h1>
+<ul>
+<li><strong>Mengukur:</strong> panjang sisi dan saiz sudut dengan tepat.</li>
+<li><strong>Membanding dan mengelas:</strong> pasangan bentuk mengikut kongruen, serupa atau tidak.</li>
+<li><strong>Menaakul:</strong> membuat generalisasi syarat kekongruenan dan keserupaan daripada data.</li>
+<li><strong>Mewakilkan:</strong> melukis imej pada kertas grid selepas gerakan.</li>
+<li><strong>Membuat perkaitan:</strong> antara transformasi isometri dengan kekongruenan, dan pembesaran dengan keserupaan.</li>
+</ul>
+<h1>6. Perkaitan Dengan Kehidupan Harian/Dunia Sebenar</h1>
+<div class="tw"><table><tr><th><strong>Situasi</strong></th><th><strong>Konsep</strong></th></tr><tr><td>Jubin lantai dan dinding yang sama</td><td>Kongruen; translasi</td></tr><tr><td>Peta dan pelan rumah berskala</td><td>Serupa; pembesaran</td></tr><tr><td>Pantulan di cermin dan permukaan air</td><td>Pantulan</td></tr><tr><td>Kincir angin, roda Ferris, jarum jam</td><td>Putaran</td></tr><tr><td>Zum gambar di telefon, projektor</td><td>Pembesaran</td></tr><tr><td>Corak batik, songket dan ukiran kayu</td><td>Translasi, pantulan dan putaran berulang</td></tr><tr><td>Kilang menghasilkan komponen yang sama</td><td>Kekongruenan (kawalan kualiti)</td></tr></table></div>
+<h1>7. Rekreasi Matematik</h1>
+<ol>
+<li><strong>Tangram Kembar:</strong> dengan 7 keping tangram, cari dua kepingan yang kongruen dan dua kepingan yang serupa tetapi tidak kongruen. (Jawapan: dua segi tiga besar adalah kongruen; segi tiga kecil dan segi tiga besar adalah serupa.)</li>
+<li><strong>Huruf Ajaib:</strong> huruf besar mana yang kelihatan sama selepas diputar 180°? (H, I, N, O, S, X, Z)</li>
+<li><strong>Teka Logo:</strong> tunjukkan logo kereta atau bank yang terkenal. Murid meneka transformasi yang digunakan untuk membinanya.</li>
+<li><strong>Cermin Nama:</strong> murid menulis nama sendiri dalam bentuk pantulan supaya dapat dibaca melalui cermin.</li>
+</ol>
+<h1>8. Bahasa Matematik</h1>
+<div class="tw"><table><tr><th><strong>Bahasa Melayu</strong></th><th><strong>Bahasa Inggeris</strong></th><th><strong>Maksud ringkas</strong></th></tr><tr><td>Kongruen</td><td>Congruent</td><td>Bentuk dan saiz sama</td></tr><tr><td>Serupa</td><td>Similar</td><td>Bentuk sama, saiz mungkin berbeza</td></tr><tr><td>Sisi sepadan</td><td>Corresponding sides</td><td>Sisi pada kedudukan yang sepadan</td></tr><tr><td>Sudut sepadan</td><td>Corresponding angles</td><td>Sudut pada kedudukan yang sepadan</td></tr><tr><td>Objek</td><td>Object</td><td>Bentuk asal sebelum transformasi</td></tr><tr><td>Imej</td><td>Image</td><td>Bentuk selepas transformasi</td></tr><tr><td>Transformasi</td><td>Transformation</td><td>Pemetaan objek kepada imej</td></tr><tr><td>Translasi</td><td>Translation</td><td>Gelongsor tanpa putar</td></tr><tr><td>Pantulan</td><td>Reflection</td><td>Terbalikkan pada satu garis</td></tr><tr><td>Putaran</td><td>Rotation</td><td>Pusingan pada satu titik</td></tr><tr><td>Pembesaran</td><td>Enlargement</td><td>Ubah saiz, kekal bentuk</td></tr><tr><td>Isometri</td><td>Isometry</td><td>Transformasi yang mengekalkan bentuk dan saiz</td></tr><tr><td>Orientasi</td><td>Orientation</td><td>Arah hadapan suatu bentuk</td></tr></table></div>
+<h1>9. Salah Konsep</h1>
+<div class="tw"><table><tr><th><strong>Salah konsep murid</strong></th><th><strong>Pembetulan</strong></th></tr><tr><td>&quot;Dua bentuk serupa jika nampak lebih kurang sama.&quot;</td><td>Mesti diuji: semua sudut sepadan sama dan nisbah semua sisi sepadan sama.</td></tr><tr><td>&quot;Semua segi empat tepat adalah serupa.&quot;</td><td>Tidak. Segi empat tepat 2 × 4 dan 3 × 4 mempunyai sudut sama tetapi nisbah sisi berbeza. (Bagi sisi empat, sudut sama sahaja tidak mencukupi.)</td></tr><tr><td>&quot;Bentuk yang diputar atau diterbalikkan tidak lagi kongruen.&quot;</td><td>Kekongruenan tidak bergantung pada kedudukan atau orientasi. Bentuk itu masih bertindih tepat selepas digerakkan.</td></tr><tr><td>&quot;Bentuk kongruen bukan serupa.&quot;</td><td>Bentuk kongruen ialah kes khas bentuk serupa dengan nisbah 1 : 1.</td></tr><tr><td>&quot;Pembesaran ialah transformasi isometri.&quot;</td><td>Pembesaran mengubah saiz, jadi bukan isometri.</td></tr><tr><td>&quot;Sisi serupa ditambah dengan nilai yang sama.&quot;</td><td>Keserupaan berdasarkan <strong>darab</strong> (nisbah), bukan tambah. 3 cm → 6 cm bermaksud × 2, bukan + 3.</td></tr><tr><td>Memadankan sisi yang salah</td><td>Padankan sisi bertentangan dengan sudut yang sama besar, atau tandakan bucu sepadan dahulu.</td></tr></table></div>
+<h1>10. Latihan Asas</h1>
+<ol>
+<li>Nyatakan sama ada setiap pasangan berikut <strong>kongruen</strong>, <strong>serupa</strong> atau <strong>bukan kedua-duanya</strong>: (a) dua segi empat sama bersisi 3 cm dan 3 cm; (b) dua segi empat sama bersisi 3 cm dan 5 cm; (c) segi tiga bersisi 3, 4, 5 cm dan segi tiga bersisi 3, 4, 6 cm.</li>
+<li>Lengkapkan: Dua bentuk adalah kongruen jika semua sisi sepadan ______ dan semua sudut sepadan ______.</li>
+<li>Bagi setiap gerakan berikut, nyatakan sama ada bentuk, saiz, kedudukan dan orientasi berubah atau kekal: (a) translasi; (b) pantulan; (c) pembesaran.</li>
+<li>Namakan transformasi: (a) pintu gelongsor dibuka; (b) jarum jam bergerak dari 12 ke 3; (c) wajah dalam cermin.</li>
+</ol>
+<h1>11. Latihan Pengukuhan</h1>
+<ol>
+<li>Segi tiga PQR dan segi tiga XYZ adalah serupa. PQ = 4 cm, QR = 6 cm, XY = 6 cm. Hitung panjang YZ.</li>
+<li>Sebuah segi empat tepat berukuran 5 cm × 8 cm. Adakah segi empat tepat berukuran 10 cm × 14 cm serupa dengannya? Berikan alasan.</li>
+<li>Dua segi tiga masing-masing mempunyai sudut 50° dan 60°. Adakah kedua-dua segi tiga itu semestinya kongruen? Jelaskan.</li>
+<li>Pada kertas grid, lukis imej huruf &quot;L&quot; selepas (a) translasi 3 unit ke kanan; (b) pantulan pada garis mencancang; (c) putaran 90° ikut arah jam. Nyatakan transformasi mana yang mengubah orientasi.</li>
+</ol>
+<h1>12. Latihan Pengayaan (KBAT)</h1>
+<ol>
+<li>Ali berkata, &quot;Jika semua sudut dua sisi empat adalah sama, maka kedua-duanya serupa.&quot; Adakah anda bersetuju? Berikan satu contoh untuk menyokong jawapan anda.</li>
+<li>Sebuah gambar berukuran 10 cm × 15 cm hendak dibesarkan supaya sisi pendeknya menjadi 25 cm. Berapakah panjang sisi panjang gambar baharu supaya ia serupa dengan gambar asal? Adakah transformasi ini isometri?</li>
+<li>Reka satu corak jubin menggunakan sekurang-kurangnya dua transformasi isometri. Terangkan transformasi yang digunakan dan buktikan setiap jubin adalah kongruen.</li>
+</ol>
+<h2>Skema Jawapan Ringkas</h2>
+<div class="tw"><table><tr><th><strong>Soalan</strong></th><th><strong>Jawapan</strong></th></tr><tr><td>Asas 1</td><td>(a) Kongruen; (b) Serupa; (c) Bukan kedua-duanya (nisbah 3:3, 4:4, 5:6 tidak sama).</td></tr><tr><td>Asas 2</td><td>sama panjang; sama besar</td></tr><tr><td>Asas 3</td><td>(a) Bentuk, saiz dan orientasi kekal, kedudukan berubah. (b) Bentuk dan saiz kekal, kedudukan dan orientasi berubah (songsang). (c) Bentuk dan orientasi kekal, saiz berubah.</td></tr><tr><td>Asas 4</td><td>(a) Translasi; (b) Putaran; (c) Pantulan</td></tr><tr><td>Pengukuhan 1</td><td>Nisbah = 6 ÷ 4 = 1.5; YZ = 6 × 1.5 = 9 cm</td></tr><tr><td>Pengukuhan 2</td><td>Tidak serupa: 10/5 = 2 tetapi 14/8 = 1.75.</td></tr><tr><td>Pengukuhan 3</td><td>Tidak semestinya. Sudut ketiga sama (70°), jadi kedua-duanya serupa, tetapi saiznya mungkin berbeza.</td></tr><tr><td>Pengukuhan 4</td><td>Pantulan dan putaran mengubah orientasi; translasi tidak.</td></tr><tr><td>Pengayaan 1</td><td>Tidak bersetuju. Contoh: segi empat sama 2 × 2 dan segi empat tepat 2 × 5 mempunyai semua sudut 90° tetapi tidak serupa.</td></tr><tr><td>Pengayaan 2</td><td>Nisbah = 25 ÷ 10 = 2.5; sisi panjang = 15 × 2.5 = 37.5 cm. Bukan isometri kerana saiz berubah.</td></tr><tr><td>Pengayaan 3</td><td>Jawapan terbuka. Nilai berdasarkan penggunaan istilah yang betul dan bukti tindihan tepat (surih).</td></tr></table></div>
+<h1>13. Pembelajaran Berasaskan Projek</h1>
+<div class="tw"><table><tr><td><strong>Projek: &quot;Motif Warisan Kita&quot; (2 minggu, berkumpulan 4–5 orang)</strong><br><strong>Tugasan:</strong> setiap kumpulan mereka satu motif batik atau songket asli pada kertas A3 menggunakan satu bentuk asas (segi tiga atau sisi empat), sekurang-kurangnya tiga jenis transformasi dan satu pasangan bentuk serupa.<br><strong>Hasil:</strong> (1) poster motif berwarna; (2) jadual yang melabel objek, imej dan transformasi; (3) pembentangan 3 minit.<br><strong>Lanjutan:</strong> motif terbaik boleh dipamer di sudut Matematik atau dijadikan penanda buku untuk program sekolah.</td></tr></table></div>
+</main>
+<footer>Disediakan oleh Cg Din (Wan Mohd Aizuddin bin Che Mat), SMK Sultan Ismail, Kota Bharu · Boleh dicetak terus dari pelayar (Ctrl/Cmd + P).</footer>
+</div>
+</body>
+</html>

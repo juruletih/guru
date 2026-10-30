@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tapak Analisis Item</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1d2433;--muted:#5b6475;--line:#d9deea;--pri:#2f5bea;--ok:#1e8e4e;--okbg:#e6f6ec;--bad:#c0392b;--badbg:#fdecea;--warn:#fff6dc;--chip:#e9edf7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px}
+header{background:#1d2a5b;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:20px}header p{margin:4px 0 0;font-size:13px;opacity:.85}
+main{max-width:1200px;margin:0 auto;padding:14px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.step{padding:7px 12px;border-radius:999px;background:var(--chip);font-size:13px;font-weight:600;cursor:pointer;border:0;color:var(--ink)}
+.step.on{background:var(--pri);color:#fff}.step.done{background:var(--okbg);color:var(--ok)}
+.card{background:var(--card);border-radius:12px;padding:16px;margin:10px 0;box-shadow:0 1px 3px rgba(20,30,60,.08)}
+h2{font-size:18px;margin:0 0 10px}h3{font-size:15px;margin:14px 0 6px}
+label{font-weight:600;font-size:13px;display:block;margin:8px 0 4px}
+input[type=text],input[type=number],select,textarea{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{width:100%;min-height:160px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:200px}
+.btn{border:0;border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer;background:var(--pri);color:#fff;font-size:14px}
+.btn.ghost{background:var(--chip);color:var(--ink)}.btn.ok{background:var(--ok)}.btn.small{padding:5px 10px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.muted{color:var(--muted);font-size:13px}
+.note{background:#eef3ff;border-left:4px solid var(--pri);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:13px}
+.warn{background:var(--warn);padding:8px 12px;border-radius:6px;margin:6px 0;font-size:13px}
+.err{background:var(--badbg);color:var(--bad);padding:8px 12px;border-radius:6px;margin:6px 0;font-size:13px}
+.good{background:var(--okbg);color:var(--ok);padding:8px 12px;border-radius:6px;margin:6px 0;font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{background:var(--chip)}
+td input,td select{width:100%;padding:4px;font-size:12px}
+td.num input{width:60px}
+td:nth-child(2) select{min-width:54px}td:nth-child(4) select{min-width:96px}td:nth-child(9) select{min-width:104px}td:nth-child(3) input{min-width:64px}
+
+.tbl{overflow-x:auto;border-radius:8px;border:1px solid var(--line)}
+.conf{display:inline-block;padding:1px 6px;border-radius:999px;font-size:11px;font-weight:700}
+.c-hi{background:var(--okbg);color:var(--ok)}.c-md{background:var(--warn);color:#8a6d00}.c-lo{background:var(--badbg);color:var(--bad)}
+.lowrow{background:#fffaf0}
+.snip{font-size:11px;color:var(--muted);max-width:260px}
+.stud{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.stud button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:12px}
+.stud button.sel{border-color:var(--pri);background:#eef2ff}.stud button.full{border-color:var(--ok)}
+.markgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.markgrid div{background:#fafbff;border:1px solid var(--line);border-radius:8px;padding:6px}
+.markgrid select{width:100%;font-size:16px;padding:6px}
+.pill{display:inline-block;background:var(--chip);border-radius:999px;padding:1px 8px;font-size:12px;margin:2px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header><h1>Tapak Analisis Item</h1><p>Lampir soalan → semak draf → senarai nama → jana Excel tapak analisis item, atau catat markah terus dalam kelas. Semua diproses dalam pelayar ini; tiada data dihantar keluar.</p></header>
+<main>
+<div class="steps" id="steps"></div>
+<div id="view"></div>
+</main>
+<script>
+"use strict";
+/* ============ DATA DSKP (terbina dalam) ============ */
+var DSKP = {"KSSM_T1_MT": {"nama": "DSKP KSSM Matematik Tingkatan 1", "bab": [[1, "NOMBOR NISBAH", [["1.1", "Integer", [["1.1.1", "Mengenal nombor positif dan nombor negatif berdasarkan situasi sebenar."], ["1.1.2", "Mengenal dan memerihalkan integer."], ["1.1.3", "Mewakilkan integer pada garis nombor dan membuat perkaitan antara nilai integer dengan kedudukan integer tersebut berbanding integer lain pada garis nombor."], ["1.1.4", "Membanding dan menyusun integer mengikut tertib."]]], ["1.2", "Operasi asas aritmetik yang melibatkan integer", [["1.2.1", "Menambah dan menolak integer menggunakan garis nombor atau kaedah lain yang sesuai."], ["1.2.2", "Mendarab dan membahagi integer menggunakan pelbagai kaedah."], ["1.2.3", "Membuat pengiraan yang melibatkan gabungan operasi asas aritmetik bagi integer mengikut tertib operasi."], ["1.2.4", "Menghuraikan hukum operasi aritmetik iaitu Hukum Identiti, Hukum Kalis Tukar Tertib, Hukum Kalis Sekutuan dan Hukum Kalis Agihan."], ["1.2.5", "Membuat pengiraan yang efisien dengan menggunakan hukum operasi asas aritmetik."], ["1.2.6", "Menyelesaikan masalah yang melibatkan integer."]]], ["1.3", "Pecahan positif dan pecahan negatif", [["1.3.1", "Mewakilkan pecahan positif dan pecahan negatif pada garis nombor."], ["1.3.2", "Membanding dan menyusun pecahan positif dan pecahan negatif mengikut tertib."], ["1.3.3", "Membuat pengiraan yang melibatkan gabungan operasi asas aritmetik bagi pecahan positif dan pecahan negatif mengikut tertib operasi."], ["1.3.4", "Menyelesaikan masalah yang melibatkan pecahan positif dan pecahan negatif."]]], ["1.4", "Perpuluhan positif dan perpuluhan negatif", [["1.4.1", "Mewakilkan perpuluhan positif dan perpuluhan negatif pada garis nombor."], ["1.4.2", "Membanding dan menyusun perpuluhan positif dan perpuluhan negatif mengikut tertib."], ["1.4.3", "Membuat pengiraan yang melibatkan gabungan operasi asas aritmetik bagi perpuluhan positif dan perpuluhan negatif mengikut tertib operasi."], ["1.4.4", "Menyelesaikan masalah yang melibatkan perpuluhan positif dan perpuluhan negatif."]]], ["1.5", "Nombor nisbah", [["1.5.1", "Mengenal dan memerihalkan nombor nisbah."], ["1.5.2", "Membuat pengiraan yang melibatkan gabungan operasi asas aritmetik bagi nombor nisbah mengikut tertib operasi."], ["1.5.3", "Menyelesaikan masalah yang melibatkan nombor nisbah."]]]]], [2, "FAKTOR DAN GANDAAN", [["2.1", "Faktor, faktor perdana dan faktor sepunya terbesar (FSTB)", [["2.1.1", "Menentu dan menyenaraikan faktor bagi nombor bulat, dan seterusnya membuat generalisasi tentang faktor."], ["2.1.2", "Menentu dan menyenaraikan faktor perdana bagi suatu nombor bulat dan seterusnya mengungkapkan nombor tersebut dalam bentuk pemfaktoran perdana."], ["2.1.3", "Menerang dan menentukan faktor sepunya bagi nombor bulat."], ["2.1.4", "Menentukan FSTB bagi dua dan tiga nombor bulat."], ["2.1.5", "Menyelesaikan masalah yang melibatkan FSTB."]]], ["2.2", "Gandaan, gandaan sepunya dan gandaan sepunya terkecil (GSTK)", [["2.2.1", "Menerang dan menentukan gandaan sepunya bagi nombor bulat."], ["2.2.2", "Menentukan GSTK bagi dua dan tiga nombor bulat."], ["2.2.3", "Menyelesaikan masalah yang melibatkan GSTK."]]]]], [3, "KUASA DUA, PUNCA KUASA DUA, KUASA TIGA DAN PUNCA KUASA TIGA", [["3.1", "Kuasa dua dan punca kuasa dua", [["3.1.1", "Menerangkan maksud kuasa dua dan kuasa dua sempurna."], ["3.1.2", "Menentukan sama ada suatu nombor adalah kuasa dua sempurna."], ["3.1.3", "Menyatakan hubungan antara kuasa dua dan punca kuasa dua."], ["3.1.4", "Menentukan kuasa dua suatu nombor tanpa dan dengan menggunakan alat teknologi."], ["3.1.5", "Menentukan punca kuasa dua suatu nombor tanpa menggunakan alat teknologi."], ["3.1.6", "Menentukan punca kuasa dua suatu nombor positif dengan menggunakan alat teknologi."], ["3.1.7", "Menganggar (i) kuasa dua suatu nombor, (ii) punca kuasa dua suatu nombor."], ["3.1.8", "Membuat generalisasi tentang pendaraban yang melibatkan (i) punca kuasa dua nombor yang sama, (ii) punca kuasa dua nombor yang berbeza."], ["3.1.9", "Mengemuka dan menyelesaikan masalah yang melibatkan kuasa dua dan punca kuasa dua."]]], ["3.2", "Kuasa tiga dan punca kuasa tiga", [["3.2.1", "Menerangkan maksud kuasa tiga dan kuasa tiga sempurna."], ["3.2.2", "Menentukan sama ada suatu nombor adalah kuasa tiga sempurna."], ["3.2.3", "Menyatakan hubungan antara kuasa tiga dan punca kuasa tiga."], ["3.2.4", "Menentukan kuasa tiga suatu nombor tanpa dan dengan menggunakan alat teknologi."], ["3.2.5", "Menentukan punca kuasa tiga suatu nombor tanpa menggunakan alat teknologi."], ["3.2.6", "Menentukan punca kuasa tiga suatu nombor dengan menggunakan alat teknologi."], ["3.2.7", "Menganggar (i) kuasa tiga suatu nombor, (ii) punca kuasa tiga suatu nombor."], ["3.2.8", "Menyelesaikan masalah yang melibatkan kuasa tiga dan punca kuasa tiga."], ["3.2.9", "Menjalankan pengiraan yang melibatkan penambahan, penolakan, pendaraban, pembahagian dan gabungan operasi tersebut ke atas kuasa dua, punca kuasa dua, kuasa tiga dan punca kuasa tiga."]]]]], [4, "NISBAH, KADAR DAN KADARAN", [["4.1", "Nisbah", [["4.1.1", "Mewakilkan hubungan antara tiga kuantiti dalam bentuk a : b : c."], ["4.1.2", "Mengenal pasti dan menentukan nisbah setara dalam konteks berangka, geometri atau situasi harian."], ["4.1.3", "Mengungkapkan nisbah dua dan tiga kuantiti dalam bentuk termudah."]]], ["4.2", "Kadar", [["4.2.1", "Menentukan hubungan antara nisbah dan kadar."]]], ["4.3", "Kadaran", [["4.3.1", "Menentukan hubungan antara nisbah dan kadaran."], ["4.3.2", "Menentukan nilai yang tidak diketahui dalam suatu kadaran."]]], ["4.4", "Nisbah, kadar dan kadaran", [["4.4.1", "Menentukan nisbah tiga kuantiti apabila dua atau lebih nisbah dua kuantiti diberi."], ["4.4.2", "Menentukan nisbah atau nilai yang berkaitan apabila diberi (i) nisbah dua kuantiti dan nilai satu kuantiti."], ["4.4.3", "Menentukan nilai yang berkaitan dengan suatu kadar."], ["4.4.4", "Menyelesaikan masalah yang melibatkan nisbah, kadar dan kadaran, termasuk membuat anggaran."]]], ["4.5", "Perkaitan antara nisbah, kadar dan kadaran dengan peratusan, pecahan dan perpuluhan", [["4.5.1", "Menentukan hubungan antara peratusan dan nisbah."], ["4.5.2", "Menentukan peratusan suatu kuantiti dengan mengaplikasikan konsep kadaran."], ["4.5.3", "Menyelesaikan masalah yang melibatkan perkaitan antara nisbah, kadar dan kadaran dengan peratusan, pecahan dan perpuluhan."]]]]], [5, "UNGKAPAN ALGEBRA", [["5.1", "Pemboleh ubah dan ungkapan algebra", [["5.1.1", "Menggunakan huruf untuk mewakilkan kuantiti yang tidak diketahui nilai."], ["5.1.2", "Menerbitkan ungkapan algebra berdasarkan ungkapan aritmetik yang mewakili suatu situasi."], ["5.1.3", "Menentukan nilai ungkapan algebra apabila nilai pemboleh ubah diberi dan membuat perkaitan dengan situasi yang sesuai."], ["5.1.4", "Mengenal pasti sebutan dalam suatu ungkapan algebra."], ["5.1.5", "Mengenal pasti sebutan serupa dan sebutan tidak serupa."]]], ["5.2", "Ungkapan algebra yang melibatkan operasi asas aritmetik", [["5.2.1", "Menambah dan menolak dua atau lebih ungkapan algebra."], ["5.2.2", "Membuat generalisasi tentang pendaraban berulang ungkapan algebra."], ["5.2.3", "Mendarab dan membahagi ungkapan algebra yang mengandungi satu sebutan."]]]]], [6, "PERSAMAAN LINEAR", [["6.1", "Persamaan linear dalam satu pemboleh ubah", [["6.1.1", "Mengenal pasti persamaan linear dalam satu pemboleh ubah dan menghuraikan ciri-ciri persamaan tersebut."], ["6.1.2", "Membentuk persamaan linear dalam satu pemboleh ubah berdasarkan suatu pernyataan atau situasi, dan sebaliknya."], ["6.1.3", "Menyelesaikan persamaan linear dalam satu pemboleh ubah."], ["6.1.4", "Menyelesaikan masalah yang melibatkan persamaan linear dalam satu pemboleh ubah."]]], ["6.2", "Persamaan linear dalam dua pemboleh ubah", [["6.2.1", "Mengenal pasti persamaan linear dalam dua pemboleh ubah dan menghuraikan ciri-ciri persamaan tersebut."], ["6.2.2", "Membentuk persamaan linear dalam dua pemboleh ubah berdasarkan suatu pernyataan atau situasi, dan sebaliknya."], ["6.2.3", "Menentu dan menjelaskan penyelesaian yang mungkin bagi persamaan linear dalam dua pembolehubah."], ["6.2.4", "Mewakilkan persamaan linear dalam dua pemboleh ubah secara graf."]]], ["6.3", "Persamaan linear serentak dalam dua pemboleh ubah", [["6.3.1", "Membentuk persamaan linear serentak berdasarkan situasi harian."], ["6.3.2", "Menyelesaikan persamaan linear serentak dalam dua pemboleh ubah menggunakan pelbagai kaedah."], ["6.3.3", "Menyelesaikan masalah yang melibatkan meneroka dan menyemak jawapan."]]]]], [7, "KETAKSAMAAN LINEAR", [["7.1", "Ketaksamaan", [["7.1.1", "Membanding nilai nombor, memerihal ketaksamaan dan seterusnya menerbitkan ketaksamaan algebra."], ["7.1.2", "Membuat generalisasi tentang ketaksamaan yang berkaitan dengan (i) sifat akas dan transitif, songsangan terhadap penambahan dan pendaraban, (ii) operasi asas aritmetik."]]], ["7.2", "Ketaksamaan linear dalam satu pemboleh ubah", [["7.2.1", "Membentuk ketaksamaan linear berdasarkan suatu situasi kehidupan harian, dan sebaliknya."], ["7.2.2", "Menyelesaikan masalah yang melibatkan ketaksamaan linear dalam satu pemboleh ubah."], ["7.2.3", "Menyelesaikan ketaksamaan linear serentak dalam satu pemboleh ubah."]]]]], [8, "GARIS DAN SUDUT", [["8.1", "Garis dan sudut", [["8.1.1", "Menentu dan menerangkan kekongruenan tembereng garis dan kekongruenan sudut."], ["8.1.2", "Menganggar dan mengukur saiz tembereng garis dan sudut serta menerangkan cara anggaran diperoleh."], ["8.1.3", "Mengenal, membanding beza dan menerangkan sifat sudut pada garis lurus, sudut refleks, dan sudut putaran lengkap."], ["8.1.4", "Memerihalkan sifat sudut pelengkap, sudut penggenap dan sudut konjugat."], ["8.1.5", "Menyelesaikan masalah yang melibatkan sudut pelengkap, sudut penggenap dan sudut konjugat."], ["8.1.6", "Membina (i) tembereng garis, (ii) pembahagi dua sama serenjang suatu tembereng garis, (iii) garis serenjang kepada suatu garis lurus, (iv) garis selari dan menerangkan rasional langkah-langkah pembinaan."], ["8.1.7", "Membina sudut dan pembahagi dua sama sudut serta menerangkan rasional langkah-langkah pembinaan."]]], ["8.2", "Sudut yang berkaitan dengan garis bersilang", [["8.2.1", "Mengenal pasti, menerangkan dan melukis sudut bertentang bucu dan sudut bersebelahan pada garis bersilang, termasuk garis serenjang."], ["8.2.2", "Menentukan nilai sudut yang berkaitan dengan garis bersilang apabila nilai sudut lain diberi."], ["8.2.3", "Menyelesaikan masalah yang melibatkan sudut yang berkaitan dengan garis bersilang."]]], ["8.3", "Sudut yang berkaitan dengan garis selari dan garis rentas lintang", [["8.3.1", "Mengenal, menerangkan dan melukis garis selari dan garis rentas lintang."], ["8.3.2", "Mengenal, menerangkan dan melukis sudut sepadan, sudut selang-seli dan sudut pedalaman."], ["8.3.3", "Menentukan sama ada dua garis lurus adalah selari berdasarkan sifat-sifat sudut yang berkaitan dengan garis rentas lintang."], ["8.3.4", "Menentukan nilai sudut yang berkaitan dengan garis selari dan garis rentas lintang apabila nilai sudut lain diberi."], ["8.3.5", "Mengenal dan mewakilkan sudut dongak dan sudut tunduk dalam situasi kehidupan sebenar."], ["8.3.6", "Menyelesaikan masalah yang melibatkan sudut yang berkaitan dengan garis selari dan garis rentas lintang."]]]]], [9, "POLIGON ASAS", [["9.1", "Poligon", [["9.1.1", "Menyatakan hubung kait antara bilangan sisi, bucu dan pepenjuru poligon."], ["9.1.2", "Melukis poligon, melabel bucu poligon dan menamakan poligon tersebut berdasarkan bucu yang telah dilabel."]]], ["9.2", "Sifat segi tiga dan sudut pedalaman serta sudut peluaran segi tiga", [["9.2.1", "Mengenal dan menyenaraikan sifat geometri bagi pelbagai jenis segi tiga."], ["9.2.2", "Membuat dan mengesahkan konjektur tentang hasil tambah sudut pedalaman dan sudut peluaran segi tiga."], ["9.2.3", "Menyelesaikan masalah yang melibatkan segi tiga."]]], ["9.3", "Sifat sisi empat dan sudut pedalaman serta sudut peluaran sisi empat", [["9.3.1", "Menghuraikan sifat geometri bagi pelbagai jenis sisi empat."], ["9.3.2", "Membuat dan mengesahkan konjektur tentang hasil tambah sudut pedalaman dan sudut peluaran sisi empat."], ["9.3.3", "Menyelesaikan masalah yang melibatkan sisi empat."], ["9.3.4", "Menyelesaikan masalah yang melibatkan gabungan segi tiga dan sisi empat."]]]]], [10, "PERIMETER DAN LUAS", [["10.1", "Perimeter", [["10.1.1", "Menentukan perimeter pelbagai bentuk apabila panjang sisi diberi atau perlu diukur."], ["10.1.2", "Menganggar perimeter pelbagai bentuk, seterusnya menilai ketepatan anggaran secara membandingkannya dengan nilai yang diukur."], ["10.1.3", "Menyelesaikan masalah yang melibatkan perimeter."]]], ["10.2", "Luas segi tiga, segi empat selari, lelayang dan trapezium", [["10.2.1", "Menganggar luas pelbagai bentuk dengan menggunakan pelbagai kaedah."], ["10.2.2", "Menerbitkan rumus luas segi tiga, segi empat selari, lelayang dan trapezium berdasarkan luas segi empat tepat."], ["10.2.3", "Menyelesaikan masalah yang melibatkan luas segi tiga, segi empat selari, lelayang, trapezium dan gabungan bentuk-bentuk tersebut."]]], ["10.3", "Perkaitan antara perimeter dan luas", [["10.3.1", "Membuat dan mengesahkan konjektur tentang perkaitan antara perimeter dan luas."], ["10.3.2", "Menyelesaikan masalah yang melibatkan perimeter dan luas segi tiga, segi empat tepat, segi empat sama, segi empat selari, lelayang, trapezium dan gabungan bentuk-bentuk tersebut."]]]]], [11, "PENGENALAN SET", [["11.1", "Set", [["11.1.1", "Menerangkan maksud set."], ["11.1.2", "Menghuraikan suatu set dengan menggunakan: (i) perihalan, (ii) penyenaraian, dan (iii) tatatanda pembina set."], ["11.1.3", "Mengenal pasti sama ada suatu objek adalah unsur kepada suatu set dan mewakilkan hubungan tersebut dengan simbol."], ["11.1.4", "Menentukan bilangan unsur bagi suatu set dan mewakilkan bilangan unsur dengan simbol."], ["11.1.5", "Membanding beza dan menerangkan sama ada dua atau lebih set adalah sama, dan seterusnya membuat generalisasi tentang kesamaan set."]]], ["11.2", "Gambar rajah Venn, set semesta, pelengkap bagi suatu set dan subset", [["11.2.1", "Mengenal pasti dan menghuraikan set semesta dan pelengkap bagi suatu set."], ["11.2.2", "Mewakilkan (i) hubungan suatu set dengan set semesta, dan (ii) pelengkap bagi suatu set dengan gambar rajah Venn."], ["11.2.3", "Mengenal pasti dan menghuraikan subset yang mungkin bagi suatu set."], ["11.2.4", "Mewakilkan suatu subset dengan gambar rajah Venn."], ["11.2.5", "Mewakilkan perkaitan antara set, subset, set semesta dan pelengkap bagi suatu set dengan gambar rajah Venn."]]]]], [12, "PENGENDALIAN DATA", [["12.1", "Proses pengumpulan, pengorganisasian dan perwakilan data, serta pentafsiran perwakilan data", [["12.1.1", "Menjana soalan statistik dan mengumpul data yang relevan."], ["12.1.2", "Mengklasifikasikan data kepada data kategori atau data numerik dan membina jadual kekerapan."], ["12.1.3", "Membina perwakilan data bagi data tak terkumpul dan menjustifikasikan kesesuaian suatu perwakilan data."], ["12.1.4", "Menukar satu perwakilan data kepada perwakilan lain yang sesuai serta memberi justifikasi."], ["12.1.5", "Mentafsir pelbagai perwakilan data termasuk membuat inferens atau ramalan."], ["12.1.6", "Membincangkan kepentingan mewakilkan data secara beretika bagi mengelakkan kekeliruan."]]]]], [13, "TEOREM PYTHAGORAS", [["13.1", "Teorem Pythagoras", [["13.1.1", "Mengenal pasti dan mendefinisikan hipotenus bagi sebuah segi tiga bersudut tegak."], ["13.1.2", "Menentukan hubungan antara sisi segi tiga bersudut tegak."], ["13.1.3", "Menentukan panjang sisi yang tidak diketahui bagi sebuah segi tiga bersudut tegak dan gabungan bentuk geometri."], ["13.1.4", "Menyelesaikan masalah yang melibatkan Teorem Pythagoras."]]], ["13.2", "Akas Teorem Pythagoras", [["13.2.1", "Menentukan sama ada suatu segi tiga adalah segi tiga bersudut tegak dan memberi justifikasi berdasarkan akas Teorem Pythagoras."], ["13.2.2", "Menyelesaikan masalah yang melibatkan akas Teorem Pythagoras."]]]]]]}, "DKP2027_T1_MT": {"nama": "DKP2027 Matematik Tingkatan 1 (SP daripada RPT cadangan — perlu disahkan)", "bab": [[1, "NOMBOR NYATA", [["1.1", "Nombor Nisbah dan Nombor Tak Nisbah", [["1.1.1", "Mengenal nombor nisbah dan nombor tak nisbah sebagai nombor nyata"], ["1.1.2", "Membanding dan menyusun nombor nyata mengikut tertib (garis nombor, simbol < dan >)"]]], ["1.2", "Operasi Asas Aritmetik Nombor Nisbah", [["1.2.1", "Membuat pengiraan gabungan operasi asas aritmetik bagi nombor nisbah mengikut tertib operasi"], ["1.2.2", "Menyelesaikan masalah gabungan operasi asas aritmetik melibatkan nombor nisbah (kewangan, ekonomi, sains)"]]], ["1.3", "Kuasa Dua, Punca Kuasa Dua, Kuasa Tiga dan Punca Kuasa Tiga", [["1.3.1", "Menerangkan maksud kuasa dan punca kuasa; hubung kait keduanya"], ["1.3.2", "Menentukan sama ada suatu nombor ialah kuasa dua sempurna atau kuasa tiga sempurna"], ["1.3.3", "Membuat pengiraan gabungan operasi asas aritmetik bagi kuasa dua, punca kuasa dua, kuasa tiga dan punca kuasa tiga"], ["1.3.4", "Menyelesaikan masalah melibatkan kuasa dua, punca kuasa dua, kuasa tiga dan punca kuasa tiga"]]]]], [2, "FAKTOR DAN GANDAAN", [["2.1", "Faktor, Faktor Perdana, Faktor Sepunya dan FSTB", [["2.1.1", "Menyenaraikan faktor dan faktor perdana bagi nombor bulat"], ["2.1.2", "Mengungkapkan nombor bulat dalam bentuk pemfaktoran perdana"], ["2.1.3", "Menentukan faktor sepunya dan FSTB bagi dua atau tiga nombor bulat; konsep koperdana"], ["2.1.4", "Menyelesaikan masalah melibatkan faktor, faktor perdana, faktor sepunya dan FSTB (agihan sumber)"]]], ["2.2", "Gandaan Sepunya dan GSTK", [["2.2.1", "Menentukan gandaan sepunya bagi nombor bulat"], ["2.2.2", "Menentukan GSTK bagi dua atau tiga nombor bulat"], ["2.2.3", "Menyelesaikan masalah melibatkan gandaan, gandaan sepunya dan GSTK (jadual pengangkutan awam)"]]]]], [3, "NISBAH, KADAR DAN PERKADARAN", [["3.1", "Nisbah", [["3.1.1", "Mewakilkan perkaitan antara tiga kuantiti dalam bentuk a : b : c"], ["3.1.2", "Menentukan nisbah setara dan mengungkapkannya dalam bentuk termudah"]]], ["3.2", "Kadar dan Perkadaran", [["3.2.1", "Menentukan perkaitan antara nisbah dan kadar (laju, pecutan, harga)"], ["3.2.2", "Menentukan perkaitan antara nisbah dan perkadaran (pertukaran unit)"], ["3.2.3", "Menentukan nilai tidak diketahui dalam suatu perkadaran (kaedah darab silang, unitari atau model bar)"], ["3.2.4", "Menyelesaikan masalah melibatkan nisbah, kadar dan perkadaran (kewangan, kesihatan, makanan)"]]]]], [4, "UNGKAPAN ALGEBRA", [["4.1", "Pemboleh Ubah dan Ungkapan Algebra", [["4.1.1", "Menggunakan huruf atau simbol untuk mewakili kuantiti tidak diketahui"], ["4.1.2", "Membentuk ungkapan algebra berdasarkan pernyataan atau situasi, dan sebaliknya"], ["4.1.3", "Melaksanakan operasi asas aritmetik bagi ungkapan algebra (jubin algebra atau model bar)"], ["4.1.4", "Menyelesaikan masalah melibatkan ungkapan algebra (kewangan, sukan, sains)"]]]]], [5, "PERSAMAAN DAN KETAKSAMAAN LINEAR", [["5.1", "Persamaan Linear", [["5.1.1", "Mengenal pasti persamaan linear dalam satu pemboleh ubah dan ciri-cirinya"], ["5.1.2", "Membentuk persamaan linear satu pemboleh ubah berdasarkan pernyataan atau situasi, dan sebaliknya"], ["5.1.3", "Menyelesaikan persamaan linear dalam satu pemboleh ubah"], ["5.1.4", "Menyelesaikan masalah melibatkan persamaan linear satu pemboleh ubah (kewangan, kejuruteraan, sukan)"]]], ["5.2", "Ketaksamaan Linear", [["5.2.1", "Membanding nilai nombor, memerihal ketaksamaan dan membentuk ketaksamaan algebra"], ["5.2.2", "Melaksanakan operasi asas aritmetik apabila kedua-dua belah ketaksamaan ditambah, ditolak, didarab atau dibahagi"], ["5.2.3", "Membentuk ketaksamaan linear berdasarkan pernyataan atau situasi, dan sebaliknya"], ["5.2.4", "Menyelesaikan masalah melibatkan ketaksamaan linear satu pemboleh ubah (pembuatan, ekonomi)"], ["5.2.5", "Menyelesaikan ketaksamaan linear serentak dalam satu pemboleh ubah"]]]]], [6, "GARIS DAN SUDUT", [["6.1", "Garis dan Sudut", [["6.1.1", "Menjelaskan kekongruenan tembereng garis dan kekongruenan sudut"], ["6.1.2", "Membina tembereng garis, pembahagi dua sama serenjang, garis serenjang, sudut dan pembahagi dua sama sudut"], ["6.1.3", "Mengenal dan membanding sifat pelbagai sudut (tirus, tegak, cakah, refleks, pelengkap, penggenap, konjugat)"], ["6.1.4", "Menentukan nilai sudut berkaitan garis bersilang (bertentang bucu, bersebelahan)"], ["6.1.5", "Menyelesaikan masalah melibatkan pelbagai sudut berkaitan garis bersilang (pembinaan, reka bentuk)"]]], ["6.2", "Sudut, Garis Selari dan Garis Rentas Lintang", [["6.2.1", "Membina garis selari dan garis rentas lintang"], ["6.2.2", "Menghubung kait sudut sepadan, sudut selang-seli dan sudut pedalaman dengan garis selari dan garis rentas lintang"], ["6.2.3", "Menyelesaikan masalah melibatkan sudut, garis selari dan garis rentas lintang (sistem pengangkutan)"]]]]], [7, "SEGI TIGA DAN SISI EMPAT", [["7.1", "Segi Tiga", [["7.1.1", "Menghuraikan dan mengelaskan segi tiga berdasarkan sifat sisi dan sudut"], ["7.1.2", "Menentukan sudut pedalaman dan sudut peluaran suatu segi tiga"], ["7.1.3", "Menyelesaikan masalah melibatkan perimeter dan luas segi tiga (pembinaan, kewangan)"]]], ["7.2", "Teorem Pythagoras", [["7.2.1", "Mengenal pasti hipotenus dan menentukan perkaitan antara sisi segi tiga bersudut tegak"], ["7.2.2", "Menyelesaikan masalah teorem Pythagoras (sisi tidak diketahui, gabungan segi tiga)"]]], ["7.3", "Sisi Empat", [["7.3.1", "Menghuraikan dan mengelaskan sisi empat berdasarkan sifat sisi dan sudut"], ["7.3.2", "Menentukan sudut pedalaman dan sudut peluaran suatu sisi empat"], ["7.3.3", "Menyelesaikan masalah perimeter dan luas sisi empat (termasuk gabungan segi tiga dan sisi empat)"]]]]], [8, "PENGENDALIAN DATA", [["8.1", "Pengendalian dan Analisis Data", [["8.1.1", "Mengumpul data yang relevan berdasarkan soalan statistik (inkuiri statistik)"], ["8.1.2", "Mengelas data numerik dan kategori dan membina jadual kekerapan (data PKJR)"], ["8.1.3", "Melengkapkan pelbagai perwakilan data (carta pai, carta palang, graf garis, plot titik, histogram, graf sebar)"], ["8.1.4", "Mentafsir pelbagai perwakilan data dan membentangkan dapatan"]]]]]]}};
+var KEY = "tapak_analisis_item_v1";
+
+/* ============ STATE ============ */
+function fresh(){ return {step:1, meta:{tajuk:"",tingkatan:"1",subjek:"Matematik",kurikulum:Object.keys(DSKP)[0],jumlah:""}, text:"", items:[], approved:false, classes:{}, curClass:"", marks:{}, curStudent:0}; }
+var S = fresh();
+function load(){ try{ var s=localStorage.getItem(KEY); if(s){ S=Object.assign(fresh(), JSON.parse(s)); } }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+/* ============ DSKP helpers ============ */
+function cur(){ return DSKP[S.meta.kurikulum] || {bab:[]}; }
+function allSP(){ var out=[]; cur().bab.forEach(function(b){ b[2].forEach(function(sk){ sk[2].forEach(function(sp){ out.push({bab:b[0],babT:b[1],sk:sk[0],skT:sk[1],sp:sp[0],spT:sp[1]}); }); }); }); return out; }
+function babName(n){ var b=cur().bab.filter(function(x){return x[0]==n;})[0]; return b? (b[0]+". "+b[1]) : ""; }
+
+/* ============ PENGEKSTRAKAN PDF ============ */
+async function pdfText(file){
+  if(!window.pdfjsLib) throw new Error("Pustaka PDF tidak dapat dimuatkan (perlu internet kali pertama).");
+  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  var buf=await file.arrayBuffer(); var doc=await pdfjsLib.getDocument({data:buf}).promise; var pages=[];
+  for(var p=1;p<=doc.numPages;p++){
+    var pg=await doc.getPage(p); var tc=await pg.getTextContent(); var rows={};
+    tc.items.forEach(function(it){ var y=Math.round(it.transform[5]/3)*3; (rows[y]=rows[y]||[]).push({x:it.transform[4],s:it.str}); });
+    var ys=Object.keys(rows).map(Number).sort(function(a,b){return b-a;});
+    pages.push(ys.map(function(y){ return rows[y].sort(function(a,b){return a.x-b.x;}).map(function(r){return r.s;}).join(" ").replace(/\s+/g," ").trim(); }).filter(Boolean).join("\n"));
+  }
+  return pages.join("\n");
+}
+
+/* ============ PENGESANAN STRUKTUR ============ */
+var STOP=new Set("yang dan atau dalam bagi untuk dengan pada ini itu suatu sebuah ialah adalah tersebut kepada daripada oleh dari setiap semua berikut rajah jadual cari hitung nyatakan tentukan tunjukkan beri jawapan anda soalan markah bahagian adakah berapakah apakah manakah".split(" "));
+function toks(s){ return (s.toLowerCase().match(/[a-z]{3,}/g)||[]).filter(function(w){return !STOP.has(w);}); }
+var BOOST={integer:[1],pecahan:[1],perpuluhan:[1],nisbah:[1,4],faktor:[2],fstb:[2],gandaan:[2],gstk:[2],perdana:[2],kuasa:[3],punca:[3],kadar:[4],kadaran:[4],peratus:[4],peratusan:[4],ungkapan:[5],sebutan:[5],algebra:[5],persamaan:[6],serentak:[6],ketaksamaan:[7],sudut:[8,9],selari:[8],bersilang:[8],tembereng:[8],poligon:[9],segi:[9,10,13],tegak:[13],tertib:[1],menaik:[1],menurun:[1],negatif:[1],positif:[1],pedalaman:[9],peluaran:[9],perimeter:[10],luas:[10],trapezium:[10],lelayang:[10],set:[11],venn:[11],subset:[11],unsur:[11],semesta:[11],data:[12],kekerapan:[12],carta:[12],graf:[12],pythagoras:[13],hipotenus:[13,13]};
+function match(text){
+  var tk=toks(text); if(!tk.length && !/\d/.test(text)) return {sp:null,conf:0};
+  var tset=new Set(tk); var best=null,bs=0,second=0;
+  allSP().forEach(function(r){
+    var st=toks(r.spT+" "+r.skT+" "+r.babT); var sc=0;
+    st.forEach(function(w){ if(tset.has(w)) sc+=1; });
+    tk.forEach(function(w){ if(BOOST[w]) BOOST[w].forEach(function(b){ if(b===r.bab) sc+=2.5; }); });
+    if(/(^|[^\w])-\s?\(?\d/.test(text) && r.bab===1) sc+=2;
+    if(/\d\s*\/\s*\d/.test(text) && r.sk==="1.3") sc+=1.5;
+    if(/selesaikan masalah|masalah/.test(text.toLowerCase()) && /masalah/.test(r.spT.toLowerCase())) sc+=1.5;
+    if(sc>bs){ second=bs; bs=sc; best=r; } else if(sc>second) second=sc;
+  });
+  var conf = bs<=0?0:Math.min(1,(bs-second*0.6)/6);
+  return {sp:best,conf:conf};
+}
+function aras(text){
+  var t=text.toLowerCase();
+  if(/buktikan|justifikasi|wajarkan|cadangkan|terangkan mengapa|bina dan|reka|adakah .* setuju|nilaikan/.test(t)) return "KBAT";
+  if(/selesaikan masalah|seterusnya|tentukan sama ada|bandingkan/.test(t)) return "Tinggi";
+  if(/hitung|cari|tentukan|selesaikan|permudahkan|ungkapkan|lukis|lengkapkan/.test(t)) return "Sederhana";
+  return "Rendah";
+}
+function clean(text){ return text.replace(/\$\$?/g,"").replace(/\\(frac|dfrac)\{([^}]*)\}\{([^}]*)\}/g,"$2/$3").replace(/\\(left|right|text|quad|Box|ge|le|times|div|sqrt|circ|xi|subset|in|notin|phi|ne|checkmark|vert)\b/g," ").replace(/[{}\\]/g,"").replace(/\*\*|__/g,"").replace(/^\s*#{1,6}\s*/gm,"").replace(/^\s*[\*\-•]\s+/gm,"").replace(/^\s*\*([^*]+)\*\s*$/gm,"$1"); }
+function detect(text){
+  text=clean(text);
+  var lines=text.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
+  var items=[], bah="A", q="", sub="", subsub="", buf=[];
+  var reBah=/^BAHAGIAN\s+([A-D])\b/i, reQ=/^(?:Soalan\s+)?(\d{1,2})\s*[\.)]?\s+(.*)$/i, reSub=/^\(([a-h])\)\s*(.*)$/i, reSubsub=/^\((i{1,3}|iv|v|vi{0,3})\)\s*(.*)$/i;
+  var reMark=/[\[\(]\s*(\d{1,2})\s*markah[^\]\)]{0,20}[\]\)]/ig, reOpt=/^[A-D][\.\)]?\s+\S/, reSecTot=/^\[\s*\d+\s*markah/i;
+  function looksObj(i){ for(var k=i+1;k<Math.min(lines.length,i+14);k++){ if(/^[A-D][\.\)]\s/.test(lines[k])) return true; if(/^\d{1,2}[\.\)]\s/.test(lines[k])||reBah.test(lines[k])) return false; } return false; }
+  var subsubLine=-1, bahLine=-99, dotted=lines.filter(function(l){return /^\d{1,2}[\.\)]\s/.test(l);}).length>=3;
+  var lastQ=0, objMode=false;
+  function push(max){
+    var label=(q||"?")+(sub?"("+sub+")":"")+(subsub?"("+subsub+")":"");
+    if(!objMode){ var n=items.filter(function(x){return x.bah===bah && (x.no===label || x.no.indexOf(label+"-")===0);}).length; if(n) label=label+"-"+(n+1); }
+    var snip=buf.join(" ").replace(/\s+/g," ").trim(); var m=match(snip);
+    items.push({bah:bah,no:label,jenis:objMode?"Objektif":(bah==="C"?"Esei":"Struktur"),max:max,bab:m.sp?m.sp.bab:"",sk:m.sp?m.sp.sk:"",sp:m.sp?m.sp.sp:"",aras:objMode?(aras(snip)==="KBAT"?"Tinggi":aras(snip)):aras(snip),conf:Math.round(m.conf*100)/100,snip:snip.slice(0,220)});
+    buf=[];
+  }
+  for(var i=0;i<lines.length;i++){
+    var L=lines[i], m;
+    if((m=L.match(reBah))){ if(objMode && q && buf.length) push(1); bah=m[1].toUpperCase(); objMode=false; q=""; sub=""; subsub=""; buf=[]; lastQ=0; bahLine=i; continue; }
+    if(reSecTot.test(L) && i-bahLine<=3) continue;
+    if(/objektif|pilih satu jawapan|pilihan jawapan/i.test(L) && bah==="A") objMode=true;
+    m=L.match(reQ);
+    if(m && dotted && !/^\d{1,2}[\.\)]\s/.test(L) && !/^Soalan/i.test(L)) m=null;
+    if(m && +m[1]>=1 && +m[1]<=60 && !/^[A-D]\s/.test(L) && ((+m[1]>lastQ && +m[1]<=lastQ+15) || /^Soalan/i.test(L))){
+      if(objMode && q && buf.length) push(1);
+      if(objMode && q && buf.length) push(1);
+      if(!q && !items.some(function(x){return x.bah===bah;}) && looksObj(i)) objMode=true;
+      q=m[1]; lastQ=+m[1]; sub=""; subsub=""; buf=[];
+      var rest=m[2]||"", ms=rest.match(reSub); if(ms){ sub=ms[1]; rest=ms[2]; }
+      buf.push(rest); L=rest;
+      if(!objMode){ var mk0; reMark.lastIndex=0; while((mk0=reMark.exec(L))) push(+mk0[1]); }
+      continue;
+    }
+    if((m=L.match(reSubsub)) && sub){ subsub=m[1]; subsubLine=i; buf.push(m[2]); }
+    else if((m=L.match(reSub)) && (!sub || m[1].charCodeAt(0)===sub.charCodeAt(0)+1) && !(subsub && m[1]<=sub)){ sub=m[1]; subsub=""; buf.push(m[2]); }
+    else if((m=L.match(reSub))){ buf.push(m[2]); }
+    else if(objMode && reOpt.test(L)){ buf.push(L); }
+    else buf.push(L);
+    var mk; reMark.lastIndex=0;
+    while((mk=reMark.exec(L))){ if(!objMode){ if(subsubLine!==i) subsub=""; push(+mk[1]); } }
+  }
+  if(objMode && q && buf.length) push(1);
+  if(!items.length){ var objCount=0; lines.forEach(function(L){ var mm=L.match(/^(\d{1,2})[\.\)]\s+/); if(mm && +mm[1]===objCount+1){objCount++; items.push({bah:"A",no:mm[1],jenis:"Objektif",max:1,bab:"",sk:"",sp:"",aras:"Rendah",conf:0,snip:L.slice(0,200)});} }); }
+  return items;
+}
+
+/* ============ SEMAKAN ============ */
+function checks(){
+  var out=[], tot=S.items.reduce(function(a,b){return a+(+b.max||0);},0);
+  if(S.meta.jumlah && +S.meta.jumlah!==tot) out.push(["err","Jumlah markah item ("+tot+") tidak sama dengan markah penuh kertas ("+S.meta.jumlah+")."]);
+  else if(S.meta.jumlah) out.push(["good","Jumlah markah item sama dengan markah penuh kertas ("+tot+")."]);
+  else out.push(["warn","Jumlah markah item: "+tot+". Isi markah penuh kertas untuk semakan."]);
+  var seen={}, dup=[]; S.items.forEach(function(it){ var k=it.bah+"|"+it.no; if(seen[k]) dup.push(it.no); seen[k]=1; });
+  if(dup.length) out.push(["err","Nombor item berulang: "+dup.join(", ")]);
+  var nob=S.items.filter(function(it){return !it.bab;}).length; if(nob) out.push(["warn",nob+" item belum ada bab."]);
+  var nom=S.items.filter(function(it){return !(+it.max>0);}).length; if(nom) out.push(["err",nom+" item tiada markah penuh."]);
+  var low=S.items.filter(function(it){return it.conf<0.35;}).length; if(low) out.push(["warn",low+" item berkeyakinan rendah (diserlahkan) — semak bab/SP."]);
+  return out;
+}
+
+/* ============ SENARAI NAMA ============ */
+function parseRoster(rows){
+  // Sokong: (1) senarai sekolah: baris tajuk kelas "1 AL KHAZINI" diikuti BIL/NAMA; (2) senarai ringkas lajur NAMA.
+  var classes={}, curC=null, nameCol=-1;
+  rows.forEach(function(r){
+    var vals=r.filter(function(v){return v!==null&&v!==undefined&&String(v).trim()!=="";});
+    if(!vals.length) return;
+    if(vals.length===1 && /^\s*\d\s*[A-Z]/.test(String(vals[0])) ){ curC=String(vals[0]).trim().replace(/\s+/g," "); classes[curC]=[]; nameCol=-1; return; }
+    var hi=r.findIndex(function(v){return /^NAMA/i.test(String(v||"").trim());}); if(hi>=0){ nameCol=hi; if(!curC){curC="KELAS"; classes[curC]=classes[curC]||[];} return; }
+    if(curC && nameCol>=0 && r[nameCol] && /^\d+\.?0?$/.test(String(r[0]||r[1]||"").trim())){ classes[curC].push(String(r[nameCol]).replace(/\s+/g," ").trim()); }
+  });
+  Object.keys(classes).forEach(function(k){ if(!classes[k].length) delete classes[k]; });
+  return classes;
+}
+
+/* ============ GRED ============ */
+var GRED=[["A+",90],["A",80],["A-",70],["B+",65],["B",60],["C+",55],["C",50],["D",45],["E",40],["G",0]];
+function gred(p){ for(var i=0;i<GRED.length;i++) if(p>=GRED[i][1]) return GRED[i][0]; return "G"; }
+function gradeFormula(cell){ var f="\"G\""; for(var i=GRED.length-2;i>=0;i--){ f='IF('+cell+'>='+GRED[i][1]+',"'+GRED[i][0]+'",'+f+')'; } return f; }
+
+/* ============ JANA EXCEL ============ */
+function colL(n){ var s=""; n++; while(n>0){ var m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26);} return s; }
+function buildWorkbook(withMarks){
+  var wb=XLSX.utils.book_new(), it=S.items, tot=it.reduce(function(a,b){return a+(+b.max||0);},0);
+  // TAPAK
+  var tap=[["TAPAK ANALISIS ITEM — "+(S.meta.tajuk||"")],["Tingkatan "+S.meta.tingkatan+" · "+S.meta.subjek+" · "+(DSKP[S.meta.kurikulum]||{}).nama+" · Markah penuh "+tot],[],["Bil","Bahagian","No. Item","Jenis","Markah Penuh","Bab","Standard Kandungan","Standard Pembelajaran","Aras"]];
+  it.forEach(function(x,i){ tap.push([i+1,x.bah,x.no,x.jenis,+x.max,babName(x.bab),x.sk,x.sp,x.aras]); });
+  var ws=XLSX.utils.aoa_to_sheet(tap); ws["!cols"]=[{wch:5},{wch:9},{wch:10},{wch:10},{wch:8},{wch:34},{wch:8},{wch:10},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws,"TAPAK");
+  Object.keys(S.classes).forEach(function(cn){
+    var names=S.classes[cn], n=names.length, first=5, last=first+n-1, ic=3; // item cols start at D
+    var aoa=[[cn+" — "+(S.meta.tajuk||"")],["Isi markah setiap item. Sel kosong = tidak menjawab (dikira 0)."],["","",""].concat(it.map(function(x){return x.bah;})),["Bil","Nama","Hadir (Y/T)"].concat(it.map(function(x){return x.no+" ["+x.max+"]";})).concat(["Jumlah","%","Gred"])];
+    names.forEach(function(nm,i){ var row=[i+1,nm,"Y"]; it.forEach(function(x,j){ var v=withMarks&&S.marks[cn]&&S.marks[cn][i]?S.marks[cn][i][j]:null; row.push(v===null||v===undefined||v===""?null:+v); }); aoa.push(row); });
+    var w=XLSX.utils.aoa_to_sheet(aoa); var jc=ic+it.length;
+    for(var r=first;r<=last;r++){
+      w[colL(jc)+r]={t:"n",f:"SUM("+colL(ic)+r+":"+colL(jc-1)+r+")"};
+      w[colL(jc+1)+r]={t:"n",f:"ROUND("+colL(jc)+r+"/"+tot+"*100,1)"};
+      w[colL(jc+2)+r]={t:"s",f:'IF($C'+r+'="T","TH",'+gradeFormula(colL(jc+1)+r)+")"};
+    }
+    var pr=last+2;
+    w["B"+pr]={t:"s",v:"Indeks kesukaran p"}; w["B"+(pr+1)]={t:"s",v:"Aras (Sukar <0.30, Mudah >0.70)"}; w["B"+(pr+2)]={t:"s",v:"% murid ≥50% markah item"};
+    it.forEach(function(x,j){ var c=colL(ic+j), rng=c+first+":"+c+last, hadir='$C$'+first+':$C$'+last;
+      w[c+pr]={t:"n",f:'IFERROR(ROUND(SUMIF('+hadir+',"Y",'+rng+')/(COUNTIF('+hadir+',"Y")*'+x.max+'),2),"")'};
+      w[c+(pr+1)]={t:"s",f:'IF('+c+pr+'="","",IF('+c+pr+'<0.3,"Sukar",IF('+c+pr+'>0.7,"Mudah","Sederhana")))'};
+      w[c+(pr+2)]={t:"n",f:'IFERROR(ROUND(COUNTIFS('+hadir+',"Y",'+rng+',">="&'+(x.max/2)+')/COUNTIF('+hadir+',"Y")*100,1),"")'};
+    });
+    w["B"+(pr+4)]={t:"s",v:"Ringkasan kelas"};
+    w["B"+(pr+5)]={t:"s",v:"Bil. hadir"}; w["C"+(pr+5)]={t:"n",f:'COUNTIF($C$'+first+':$C$'+last+',"Y")'};
+    w["B"+(pr+6)]={t:"s",v:"Min %"}; w["C"+(pr+6)]={t:"n",f:'IFERROR(ROUND(AVERAGEIF($C$'+first+':$C$'+last+',"Y",'+colL(jc+1)+first+':'+colL(jc+1)+last+'),1),"")'};
+    w["B"+(pr+7)]={t:"s",v:"% lulus (≥40%)"}; w["C"+(pr+7)]={t:"n",f:'IFERROR(ROUND(COUNTIFS($C$'+first+':$C$'+last+',"Y",'+colL(jc+1)+first+':'+colL(jc+1)+last+',">=40")/C'+(pr+5)+'*100,1),"")'};
+    // Penguasaan bab
+    var babs={}; it.forEach(function(x,j){ var k=x.bab||"?"; (babs[k]=babs[k]||[]).push(j); });
+    var br=pr+9; w["B"+br]={t:"s",v:"Penguasaan mengikut bab (%)"}; br++;
+    Object.keys(babs).sort(function(a,b){return (+a||99)-(+b||99);}).forEach(function(k){
+      var js=babs[k], num=js.map(function(j){var c=colL(ic+j);return 'SUMIF($C$'+first+':$C$'+last+',"Y",'+c+first+':'+c+last+')';}).join("+"), den=js.reduce(function(a,j){return a+(+it[j].max);},0);
+      w["B"+br]={t:"s",v:k==="?"?"(Tiada bab)":babName(k)}; w["C"+br]={t:"n",f:'IFERROR(ROUND(('+num+')/(COUNTIF($C$'+first+':$C$'+last+',"Y")*'+den+')*100,1),"")'}; br++;
+    });
+    w["!ref"]="A1:"+colL(jc+2)+(br+1);
+    w["!cols"]=[{wch:5},{wch:42},{wch:8}].concat(it.map(function(){return {wch:8};})).concat([{wch:8},{wch:7},{wch:6}]);
+    w["!freeze"]={xSplit:3,ySplit:4};
+    XLSX.utils.book_append_sheet(wb,w,cn.replace(/[\\\/\?\*\[\]:]/g,"").slice(0,31));
+  });
+  return wb;
+}
+function download(withMarks){
+  if(!window.XLSX){ alert("Pustaka Excel tidak dapat dimuatkan (perlu internet kali pertama)."); return; }
+  var wb=buildWorkbook(withMarks); var nm=(S.meta.tajuk||"Analisis Item").replace(/[^\w\- ]+/g,"").trim()||"Analisis Item";
+  XLSX.writeFile(wb, "TAPAK ANALISIS ITEM - "+nm+(withMarks?" (dengan markah)":"")+".xlsx");
+}
+
+/* ============ PAPARAN ============ */
+var STEPS=["1 Maklumat & Soalan","2 Semak Draf","3 Senarai Nama","4 Jana Excel","5 Catat dalam Kelas"];
+function go(n){ S.step=n; save(); render(); }
+function render(){
+  document.getElementById("steps").innerHTML=STEPS.map(function(t,i){ var n=i+1; var cls=n===S.step?"on":(n<S.step?"done":""); return '<button class="step '+cls+'" onclick="go('+n+')">'+t+'</button>'; }).join("");
+  var v=document.getElementById("view"); var sy=window.scrollY, tb=document.querySelector(".tbl"), sx=tb?tb.scrollLeft:0, same=(render._last===S.step);
+  v.innerHTML=[v1,v2,v3,v4,v5][S.step-1]();
+  if(same){ window.scrollTo(0,sy); var tb2=document.querySelector(".tbl"); if(tb2) tb2.scrollLeft=sx; } else window.scrollTo(0,0);
+  render._last=S.step;
+  if(S.step===5) bind5();
+  if(S.step===3) bind3();
+}
+function opt(list,val){ return list.map(function(o){ var k=Array.isArray(o)?o[0]:o, t=Array.isArray(o)?o[1]:o; return '<option value="'+esc(k)+'"'+(String(k)===String(val)?" selected":"")+'>'+esc(t)+'</option>'; }).join(""); }
+function v1(){
+  return '<div class="card"><h2>1. Maklumat ujian dan soalan</h2>'+
+  '<div class="row"><div><label>Tajuk ujian</label><input type="text" id="m_tajuk" value="'+esc(S.meta.tajuk)+'" placeholder="cth. UASA Matematik T1 2026" style="width:100%"></div>'+
+  '<div><label>Kurikulum / DSKP</label><select id="m_kur" style="width:100%">'+opt(Object.keys(DSKP).map(function(k){return [k,DSKP[k].nama];}),S.meta.kurikulum)+'</select></div>'+
+  '<div><label>Markah penuh kertas</label><input type="number" id="m_jum" value="'+esc(S.meta.jumlah)+'" placeholder="cth. 100" style="width:100%"></div></div>'+
+  '<div class="row"><div><label>Lampiran soalan (PDF)</label><input type="file" id="f_pdf" accept="application/pdf" multiple></div>'+
+  '<div><label>Tambah DSKP lain (JSON)</label><input type="file" id="f_dskp" accept=".json"><div class="muted">Format sama seperti data terbina dalam. Disimpan dalam pelayar ini.</div></div></div>'+
+  '<label>Teks soalan (diisi automatik daripada PDF; boleh tampal/sunting)</label><textarea id="m_text" placeholder="Tampal teks soalan di sini jika PDF ialah imbasan.">'+esc(S.text)+'</textarea>'+
+  '<div class="note">Pengesanan membaca: <b>BAHAGIAN A/B/C</b>, nombor soalan, sub-soalan (a)(i), dan penanda markah seperti <b>[2 markah]</b>. Soalan objektif diberi 1 markah. PDF imbasan (gambar) tidak mempunyai teks — tampal teks atau isi item secara manual di Langkah 2.</div>'+
+  '<div id="m_msg"></div><button class="btn" onclick="analyse()">Analisis soalan →</button> <button class="btn ghost" onclick="resetAll()">Mula semula</button></div>';
+}
+function readMeta(){ var g=function(id){var e=document.getElementById(id);return e?e.value:null;}; if(g("m_tajuk")!==null){ S.meta.tajuk=g("m_tajuk"); S.meta.kurikulum=g("m_kur"); S.meta.jumlah=g("m_jum"); S.text=g("m_text"); } }
+async function analyse(){
+  readMeta(); var msg=document.getElementById("m_msg");
+  var fd=document.getElementById("f_dskp"); if(fd.files[0]){ try{ var add=JSON.parse(await fd.files[0].text()); Object.assign(DSKP,add); var extra=JSON.parse(localStorage.getItem(KEY+"_dskp")||"{}"); Object.assign(extra,add); localStorage.setItem(KEY+"_dskp",JSON.stringify(extra)); msg.innerHTML='<div class="good">DSKP tambahan dimuatkan.</div>'; }catch(e){ msg.innerHTML='<div class="err">Fail DSKP tidak sah.</div>'; return; } }
+  var fp=document.getElementById("f_pdf");
+  if(fp.files.length){ msg.innerHTML='<div class="note">Membaca PDF…</div>'; try{ var parts=[]; for(var i=0;i<fp.files.length;i++) parts.push(await pdfText(fp.files[i])); S.text=parts.join("\n"); }catch(e){ msg.innerHTML='<div class="err">'+esc(e.message)+'</div>'; return; } }
+  if(!S.text || S.text.trim().length<20){ msg.innerHTML='<div class="err">Tiada teks soalan. PDF mungkin imbasan — tampal teks soalan atau tambah item secara manual.</div>'; S.items=S.items||[]; save(); return; }
+  S.items=detect(S.text); S.approved=false; save();
+  msg.innerHTML='<div class="good">'+S.items.length+' item dikesan.</div>'; go(2);
+}
+function resetAll(){ var m=document.getElementById("m_msg"); if(!resetAll.arm){ resetAll.arm=1; m.innerHTML='<div class="warn">Tekan <b>Mula semula</b> sekali lagi untuk memadam semua data tapak ini.</div>'; return; } resetAll.arm=0; S=fresh(); save(); render(); }
+function confirmInline(t){ return window.confirm ? window.confirm(t) : true; }
+function v2(){
+  var babs=cur().bab.map(function(b){return [b[0],b[0]+". "+b[1]];});
+  var rows=S.items.map(function(x,i){
+    var b=cur().bab.filter(function(bb){return bb[0]==x.bab;})[0]; var sks=b?b[2]:[]; var sk=sks.filter(function(s){return s[0]===x.sk;})[0]; var sps=sk?sk[2]:[];
+    var c=x.conf>=0.6?"c-hi":(x.conf>=0.35?"c-md":"c-lo");
+    return '<tr class="'+(x.conf<0.35?"lowrow":"")+'"><td>'+(i+1)+'</td>'+
+      '<td><select onchange="setI('+i+',\'bah\',this.value)">'+opt(["A","B","C","D"],x.bah)+'</select></td>'+
+      '<td><input type="text" value="'+esc(x.no)+'" onchange="setI('+i+',\'no\',this.value)"></td>'+
+      '<td><select onchange="setI('+i+',\'jenis\',this.value)">'+opt(["Objektif","Struktur","Esei"],x.jenis)+'</select></td>'+
+      '<td class="num"><input type="number" min="0" value="'+esc(x.max)+'" onchange="setI('+i+',\'max\',this.value)"></td>'+
+      '<td><select onchange="setI('+i+',\'bab\',this.value,1)">'+'<option value="">—</option>'+opt(babs,x.bab)+'</select></td>'+
+      '<td><select onchange="setI('+i+',\'sk\',this.value,2)"><option value="">—</option>'+opt(sks.map(function(s){return [s[0],s[0]+" "+s[1]];}),x.sk)+'</select></td>'+
+      '<td><select onchange="setI('+i+',\'sp\',this.value)" title="'+esc((sps.filter(function(p){return p[0]===x.sp;})[0]||["",""])[1])+'"><option value="">—</option>'+opt(sps.map(function(p){return [p[0],p[0]+" "+p[1].slice(0,60)];}),x.sp)+'</select></td>'+
+      '<td><select onchange="setI('+i+',\'aras\',this.value)">'+opt(["Rendah","Sederhana","Tinggi","KBAT"],x.aras)+'</select></td>'+
+      '<td><span class="conf '+c+'">'+Math.round(x.conf*100)+'%</span></td>'+
+      '<td class="snip">'+esc(x.snip)+'</td><td><button class="btn ghost small" onclick="delI('+i+')">✕</button></td></tr>';
+  }).join("");
+  var ch=checks().map(function(c){return '<div class="'+c[0]+'">'+esc(c[1])+'</div>';}).join("");
+  var bt={}; S.items.forEach(function(x){ bt[x.bah]=(bt[x.bah]||0)+(+x.max||0); });
+  var sumline='<div class="muted">Jumlah mengikut bahagian: '+Object.keys(bt).sort().map(function(k){return 'Bahagian '+k+' = '+bt[k];}).join(' · ')+'</div>';
+  return '<div class="card"><h2>2. Semak draf analisis item</h2>'+sumline+'<div class="muted">Sunting mana-mana sel. Peratus ialah keyakinan padanan bab/SP; baris kuning perlu disemak. Teks di lajur akhir ialah petikan soalan.</div>'+ch+
+  '<div class="tbl"><table><tr><th>#</th><th>Bhg</th><th>No.</th><th>Jenis</th><th>Markah</th><th>Bab</th><th>SK</th><th>SP</th><th>Aras</th><th>Yakin</th><th>Petikan soalan</th><th></th></tr>'+rows+'</table></div>'+
+  '<p><button class="btn ghost" onclick="addI()">+ Tambah item</button> <button class="btn ghost" onclick="go(1)">← Kembali</button> '+
+  '<button class="btn ok" onclick="approve()">Saya setuju dengan draf ini →</button></p><div id="ap_msg"></div></div>';
+}
+function setI(i,k,v,lvl){ var x=S.items[i]; x[k]=(k==="max")?(+v||0):v; if(lvl===1){x.sk="";x.sp="";} if(lvl===2){x.sp="";} if(k==="bab"||k==="sk"||k==="sp") x.conf=1; S.approved=false; save(); render(); }
+function delI(i){ S.items.splice(i,1); save(); render(); }
+function addI(){ var last=S.items[S.items.length-1]||{bah:"A"}; S.items.push({bah:last.bah,no:"",jenis:"Struktur",max:1,bab:"",sk:"",sp:"",aras:"Sederhana",conf:1,snip:""}); save(); render(); }
+function approve(force){ var errs=checks().filter(function(c){return c[0]==="err";}); if(errs.length && !force){ var b=document.getElementById("ap_msg"); b.innerHTML='<div class="err">Masih ada ralat: '+esc(errs.map(function(e){return e[1];}).join(" | "))+' <button class="btn small" onclick="approve(true)">Teruskan juga</button></div>'; b.scrollIntoView({block:"center"}); return; } S.approved=true; go(3); }
+function v3(){
+  var list=Object.keys(S.classes).map(function(k){return '<span class="pill">'+esc(k)+' ('+S.classes[k].length+')</span>';}).join("")||'<span class="muted">Belum ada kelas.</span>';
+  return '<div class="card"><h2>3. Senarai nama murid</h2>'+
+  '<label>Fail Excel senarai murid</label><input type="file" id="f_ros" accept=".xlsx,.xls,.csv"><div class="muted">Menyokong senarai sekolah (banyak kelas dalam satu helaian, dengan tajuk kelas seperti "1 AL KHAZINI") atau senarai ringkas berlajur NAMA.</div>'+
+  '<div id="r_pick"></div>'+
+  '<label>Atau tampal nama (satu nama setiap baris)</label><div class="row"><div><input type="text" id="r_cls" placeholder="Nama kelas, cth. 1 KHAZINI" style="width:100%"></div></div><textarea id="r_names" style="min-height:100px"></textarea>'+
+  '<p><button class="btn ghost" onclick="addPasted()">Tambah kelas daripada teks</button></p>'+
+  '<h3>Kelas dipilih</h3><div>'+list+'</div><p><button class="btn ghost" onclick="S.classes={};save();render()">Kosongkan</button> <button class="btn" onclick="go(4)" '+(Object.keys(S.classes).length?"":"disabled")+'>Seterusnya →</button></p></div>'+
+  '';
+}
+var ROSTER_TMP={};
+function bind3(){ var f=document.getElementById("f_ros"); if(!f) return; f.onchange=async function(){ if(!window.XLSX){alert("Pustaka Excel tidak dapat dimuatkan.");return;} var wb=XLSX.read(await f.files[0].arrayBuffer()); ROSTER_TMP={}; wb.SheetNames.forEach(function(sn){ var rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:null}); var c=parseRoster(rows); if(Object.keys(c).length===1 && c.KELAS){ c[sn]=c.KELAS; delete c.KELAS; } Object.assign(ROSTER_TMP,c); });
+  var ks=Object.keys(ROSTER_TMP); document.getElementById("r_pick").innerHTML= ks.length? '<label>Pilih kelas ('+ks.length+' dikesan)</label><div class="stud">'+ks.map(function(k,i){return '<label style="font-weight:400"><input type="checkbox" class="rc" value="'+esc(k)+'"> '+esc(k)+' ('+ROSTER_TMP[k].length+')</label>';}).join("")+'</div><p><button class="btn" onclick="takeRoster()">Ambil kelas dipilih</button></p>' : '<div class="err">Tiada kelas dikesan dalam fail ini.</div>'; }; }
+function takeRoster(){ document.querySelectorAll(".rc:checked").forEach(function(c){ S.classes[c.value]=ROSTER_TMP[c.value]; }); save(); render(); }
+function addPasted(){ var c=document.getElementById("r_cls").value.trim()||"KELAS"; var ns=document.getElementById("r_names").value.split(/\n/).map(function(s){return s.trim();}).filter(Boolean); if(!ns.length) return; S.classes[c]=ns; save(); render(); }
+function v4(){
+  var tot=S.items.reduce(function(a,b){return a+(+b.max||0);},0);
+  return '<div class="card"><h2>4. Jana Excel tapak analisis item</h2>'+
+  (S.approved?'':'<div class="warn">Draf belum disahkan di Langkah 2.</div>')+
+  '<p>'+S.items.length+' item · markah penuh '+tot+' · '+Object.keys(S.classes).length+' kelas</p>'+
+  '<div class="note">Fail mengandungi helaian <b>TAPAK</b> (item, bab, SK, SP, aras) dan satu helaian bagi setiap kelas dengan formula: jumlah, %, gred, indeks kesukaran p bagi setiap item, % murid menguasai item, min kelas, % lulus dan penguasaan mengikut bab. Isi lajur Hadir dengan T bagi murid tidak hadir.</div>'+
+  '<p><button class="btn ok" onclick="download(false)">Muat turun Excel (kosong, untuk diisi)</button> <button class="btn ghost" onclick="go(5)">Atau catat markah dalam kelas →</button></p></div>';
+}
+function v5(){
+  var cls=Object.keys(S.classes); if(!cls.length) return '<div class="card"><div class="err">Tambah senarai nama dahulu (Langkah 3).</div></div>';
+  if(!S.curClass || !S.classes[S.curClass]) S.curClass=cls[0];
+  var names=S.classes[S.curClass]; var M=(S.marks[S.curClass]=S.marks[S.curClass]||names.map(function(){return S.items.map(function(){return "";});}));
+  var i=Math.min(S.curStudent,names.length-1);
+  var studs=names.map(function(n,k){ var full=M[k]&&M[k].every(function(v){return v!=="";}); return '<button class="'+(k===i?"sel ":"")+(full?"full":"")+'" onclick="pickS('+k+')">'+(k+1)+'. '+esc(n.slice(0,26))+'</button>'; }).join("");
+  var grid=S.items.map(function(x,j){ var o=['<option value="">–</option>']; for(var m=0;m<=+x.max;m++) o.push('<option value="'+m+'"'+(String(M[i][j])===String(m)?" selected":"")+'>'+m+'</option>'); return '<div><div class="muted">'+esc(x.bah+" "+x.no)+' /'+x.max+'</div><select data-j="'+j+'">'+o.join("")+'</select></div>'; }).join("");
+  var tot=S.items.reduce(function(a,b){return a+(+b.max||0);},0), sum=M[i].reduce(function(a,v){return a+(+v||0);},0);
+  var stats=S.items.map(function(x,j){ var vals=M.map(function(r){return r[j];}).filter(function(v){return v!=="";}); var p=vals.length?vals.reduce(function(a,v){return a+(+v);},0)/(vals.length*x.max):null; return '<span class="pill">'+esc(x.no)+': '+(p===null?"–":p.toFixed(2))+'</span>'; }).join("");
+  return '<div class="card"><h2>5. Catat markah dalam kelas</h2><div class="row"><div><label>Kelas</label><select onchange="S.curClass=this.value;S.curStudent=0;save();render()">'+opt(cls,S.curClass)+'</select></div></div>'+
+  '<h3>Murid</h3><div class="stud">'+studs+'</div>'+
+  '<h3>'+(i+1)+'. '+esc(names[i])+' — jumlah '+sum+'/'+tot+' ('+(tot?Math.round(sum/tot*100):0)+'%, '+gred(tot?sum/tot*100:0)+')</h3><div class="markgrid" id="mg">'+grid+'</div>'+
+  '<p><button class="btn ghost" onclick="pickS('+Math.max(0,i-1)+')">← Murid sebelum</button> <button class="btn" onclick="pickS('+Math.min(names.length-1,i+1)+')">Murid seterusnya →</button></p>'+
+  '<h3>Indeks kesukaran semasa (p)</h3><div>'+stats+'</div>'+
+  '<p><button class="btn ok" onclick="download(true)">Muat turun Excel dengan markah</button></p><div class="muted">Markah disimpan automatik dalam pelayar ini.</div></div>';
+}
+function pickS(k){ S.curStudent=k; save(); render(); }
+function bind5(){ var mg=document.getElementById("mg"); if(!mg) return; mg.querySelectorAll("select").forEach(function(s){ s.onchange=function(){ var j=+s.dataset.j; S.marks[S.curClass][Math.min(S.curStudent,S.classes[S.curClass].length-1)][j]=s.value; save(); render(); }; }); }
+
+/* ============ MULA ============ */
+try{ Object.assign(DSKP, JSON.parse(localStorage.getItem(KEY+"_dskp")||"{}")); }catch(e){}
+load(); render();
+</script>
+</body>
+</html>
